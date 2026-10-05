@@ -1,0 +1,32 @@
+:root { --tick: 1000ms; --row-h: 18px; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; font: 12px/1.2 "Benton Sans", "Segoe UI", "Microsoft JhengHei", Arial, sans-serif; color: #333; background: #fff; }
+#app { display: flex; flex-direction: column; height: 100%; }
+
+#bar { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-bottom: 1px solid #e3e3e3; flex: 0 0 auto; }
+#bar button { border: 1px solid #c8c8c8; background: #f7f7f7; border-radius: 4px; padding: 3px 9px; cursor: pointer; font-size: 13px; }
+#bar button:hover { background: #ececec; }
+#scrub { flex: 1 1 auto; min-width: 60px; }
+#bar label { white-space: nowrap; }
+
+#settings { padding: 8px; border-bottom: 1px solid #e3e3e3; background: #fafafa; flex: 0 0 auto; }
+#settings .row { display: flex; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
+#settings label { display: flex; flex-direction: column; gap: 2px; min-width: 150px; }
+#settings select, #settings input[type=number] { min-width: 150px; }
+#s-msg { margin-left: 10px; color: #b00020; align-self: center; }
+
+#stage { position: relative; flex: 1 1 auto; overflow: hidden; padding: 4px 12px 8px; }
+#period-label { position: absolute; right: 16px; bottom: 6px; font-size: 40px; font-weight: 700; color: #00000026; pointer-events: none; z-index: 0; font-variant-numeric: tabular-nums; }
+#rows { position: relative; z-index: 1; }
+
+.r { position: absolute; left: 0; right: 0; height: var(--row-h); display: flex; align-items: center;
+     transition: transform var(--tick) linear, opacity var(--tick) linear; will-change: transform; }
+.r .rk { flex: 0 0 26px; text-align: right; padding-right: 6px; color: #888; font-variant-numeric: tabular-nums; }
+.r .nm { flex: 0 0 140px; padding-right: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+.r .track { position: relative; flex: 1 1 auto; height: calc(var(--row-h) - 3px); }
+.r .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 0 3px 3px 0; transition: width var(--tick) linear; }
+.r .val { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding-left: 5px; white-space: nowrap;
+          font-variant-numeric: tabular-nums; transition: left var(--tick) linear; }
+.r.out { opacity: 0; }
+
+#notice { position: absolute; inset: 40% 10% auto 10%; text-align: center; color: #666; font-size: 13px; }

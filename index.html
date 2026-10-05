@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bar Race</title>
+<link rel="stylesheet" href="bar_race.css">
+</head>
+<body>
+<div id="app">
+  <header id="bar">
+    <button id="btn-play" title="Play / Pause">▶</button>
+    <button id="btn-restart" title="Restart">⏮</button>
+    <input id="scrub" type="range" min="0" max="0" value="0">
+    <select id="speed" title="Tick duration">
+      <option value="1500">0.67x</option>
+      <option value="1000" selected>1x</option>
+      <option value="600">1.7x</option>
+      <option value="300">3.3x</option>
+    </select>
+    <label><input id="loop" type="checkbox" checked> loop</label>
+    <button id="btn-gear" title="Settings">⚙</button>
+  </header>
+
+  <section id="settings" hidden>
+    <div class="row"><label>Worksheet <select id="s-sheet"></select></label></div>
+    <div class="row"><label>Period <select id="s-period"></select></label>
+      <label>Item (id) <select id="s-id"></select></label></div>
+    <div class="row"><label>Label (name) <select id="s-name"></select></label>
+      <label>Value <select id="s-value"></select></label></div>
+    <div class="row"><label>Rank (optional) <select id="s-rank"></select></label>
+      <label>Top N <input id="s-topn" type="number" min="1" max="200" value="50"></label></div>
+    <div class="row"><label>Frames
+        <select id="s-gran"><option value="all">all</option><option value="day">last frame of each day</option></select></label>
+      <label>Axis
+        <select id="s-axis"><option value="zoom">zoom to data</option><option value="zero">from 0</option></select></label></div>
+    <div class="row"><button id="s-apply">Apply</button><span id="s-msg"></span></div>
+  </section>
+
+  <main id="stage">
+    <div id="period-label"></div>
+    <div id="rows"></div>
+    <div id="notice" hidden></div>
+  </main>
+</div>
+
+<script src="https://extensions.tableau.com/lib/tableau.extensions.1.latest.js"></script>
+<script src="bar_race.js"></script>
+</body>
+</html>
