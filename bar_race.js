@@ -335,7 +335,11 @@ function loadSavedCfg() {
 }
 
 async function init() {
-  const mock = /[?&]mock/.test(location.search) || typeof tableau === 'undefined' || !tableau.extensions;
+  const mock = /[?&]mock/.test(location.search);
+  if (!mock && (typeof tableau === 'undefined' || !tableau.extensions)) {
+    notice('Tableau Extensions API failed to load (lib/tableau.extensions.1.latest.js).');
+    return;
+  }
   if (!mock) {
     await tableau.extensions.initializeAsync();
     S.dashboard = tableau.extensions.dashboardContent.dashboard;
