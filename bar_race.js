@@ -33,7 +33,11 @@ const S = {
 async function readSheet(ws) {
   if (ws.getSummaryDataReaderAsync) {
     const reader = await ws.getSummaryDataReaderAsync(10000, { ignoreSelection: true });
-    try { return await reader.getAllPagesAsync(); } finally { await reader.releaseAsync(); }
+    try {
+      // getAllPagesAsync throws "0 is invalid value for range: [0..0)" when the sheet has no rows
+      // (filter leaves nothing, or the sheet is mid-refresh); the legacy call still returns the columns.
+      if (reader.pageCount > 0) return await reader.getAllPagesAsync();
+    } finally { await reader.releaseAsync(); }
   }
   return ws.getSummaryDataAsync({ ignoreSelection: true, maxRows: 0 });
 }
@@ -265,6 +269,7 @@ async function loadData(resetPos) {
     return;
   }
   S.table = dt;
+  if (!dt.columns.length) { rebuild(resetPos); return; } // no columns: keep the field mapping as is
   S.columns = dt.columns.map((c) => c.fieldName);
 
   const g = guessColumns(S.columns);
