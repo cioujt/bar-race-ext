@@ -1,32 +1,55 @@
-:root { --tick: 1000ms; --row-h: 18px; }
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; font: 12px/1.2 "Benton Sans", "Segoe UI", "Microsoft JhengHei", Arial, sans-serif; color: #333; background: #fff; }
-#app { display: flex; flex-direction: column; height: 100%; }
+/* ===== 可調參數 ===== */
+:root {
+  --tick: 1000ms;      /* 每格動畫時長；JS 依速度選單覆寫 */
+  --row-h: 36px;       /* 每列總高度（bar + 間距）；JS 依畫面高度 ÷ 列數自動算 */
+  --bar-gap: 12px;      /* bar 之間的間距：bar 高度 = --row-h − --bar-gap */
+  --font-scale: 0.6;   /* 列文字大小 = --row-h × 此倍率 */
+  --font-min: 11px;    /* 列文字最小 */
+  --font-max: 20px;    /* 列文字最大 */
+}
 
+/* ===== 頁面基本設定 ===== */
+* { box-sizing: border-box; }                     /* width/height 含 padding 與 border */
+html, body { height: 100%; margin: 0; font: 12px/1.2 "Benton Sans", "Segoe UI", "Microsoft JhengHei", Arial, sans-serif; color: #333; background: #fff; }
+#app { display: flex; flex-direction: column; height: 100%; }   /* 上：工具列/設定；下：圖表撐滿剩餘高度 */
+
+/* ===== 上方工具列（播放、拖曳軸、速度、loop、齒輪） ===== */
 #bar { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-bottom: 1px solid #e3e3e3; flex: 0 0 auto; }
 #bar button { border: 1px solid #c8c8c8; background: #f7f7f7; border-radius: 4px; padding: 3px 9px; cursor: pointer; font-size: 13px; }
 #bar button:hover { background: #ececec; }
-#scrub { flex: 1 1 auto; min-width: 60px; }
+#scrub { flex: 1 1 auto; min-width: 60px; }      /* 時間拖曳軸吃掉工具列剩餘寬度 */
 #bar label { white-space: nowrap; }
 
+/* ===== 設定面板（按 ⚙ 展開） ===== */
 #settings { padding: 8px; border-bottom: 1px solid #e3e3e3; background: #fafafa; flex: 0 0 auto; }
 #settings .row { display: flex; gap: 12px; margin-bottom: 6px; flex-wrap: wrap; }
-#settings label { display: flex; flex-direction: column; gap: 2px; min-width: 150px; }
+#settings label { display: flex; flex-direction: column; gap: 2px; min-width: 150px; }   /* 標題在上、下拉選單在下 */
 #settings select, #settings input[type=number] { min-width: 150px; }
-#s-msg { margin-left: 10px; color: #b00020; align-self: center; }
+#s-msg { margin-left: 10px; color: #b00020; align-self: center; }   /* Apply 後的儲存訊息 */
 
+/* ===== 圖表區 ===== */
 #stage { position: relative; flex: 1 1 auto; overflow: hidden; padding: 4px 12px 8px; }
+/* 右下角的大字時間浮水印；pointer-events:none 讓滑鼠穿透、z-index 0 墊在 bar 後面 */
 #period-label { position: absolute; right: 16px; bottom: 6px; font-size: 40px; font-weight: 700; color: #00000026; pointer-events: none; z-index: 0; font-variant-numeric: tabular-nums; }
-#rows { position: relative; z-index: 1; }
+/* 所有 bar 列的容器；文字大小隨列高縮放，夾在 --font-min ~ --font-max 之間 */
+#rows { position: relative; z-index: 1; font-size: clamp(var(--font-min), calc(var(--row-h) * var(--font-scale)), var(--font-max)); }
 
+/* ===== 單一 bar 列：名次 | 名稱 | bar + 數值 =====
+   每列絕對定位，JS 用 translateY(名次 × 列高) 擺位置；transition 讓換名次時滑動 */
 .r { position: absolute; left: 0; right: 0; height: var(--row-h); display: flex; align-items: center;
      transition: transform var(--tick) linear, opacity var(--tick) linear; will-change: transform; }
-.r .rk { flex: 0 0 26px; text-align: right; padding-right: 6px; color: #888; font-variant-numeric: tabular-nums; }
-.r .nm { flex: 0 0 140px; padding-right: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
-.r .track { position: relative; flex: 1 1 auto; height: calc(var(--row-h) - 3px); }
+/* 名次；tabular-nums 讓數字等寬，滾動時不跳動 */
+.r .rk { flex: 0 0 32px; text-align: right; padding-right: 6px; color: #888; font-weight: 600; font-variant-numeric: tabular-nums; }
+/* 名稱；固定寬度，過長以 … 截斷（滑鼠移上去看全名） */
+.r .nm { flex: 0 0 160px; padding-right: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; font-weight: 700; }
+/* bar 軌道；高度扣掉 --bar-gap 就是 bar 之間的空隙 */
+.r .track { position: relative; flex: 1 1 auto; height: calc(var(--row-h) - var(--bar-gap)); }
+/* bar 本體；寬度由 JS 設定百分比，transition 讓長度平滑變化；顏色由 JS 依 id 指定 */
 .r .fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 0 3px 3px 0; transition: width var(--tick) linear; }
-.r .val { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding-left: 5px; white-space: nowrap;
+/* bar 尾端的數值；left 跟著 bar 寬度一起移動 */
+.r .val { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding-left: 5px; white-space: nowrap; font-weight: 700;
           font-variant-numeric: tabular-nums; transition: left var(--tick) linear; }
-.r.out { opacity: 0; }
+.r.out { opacity: 0; }   /* 掉出 Top N 的列：淡出（JS 同時把它移到最底下） */
 
+/* ===== 無資料 / 錯誤訊息 ===== */
 #notice { position: absolute; inset: 40% 10% auto 10%; text-align: center; color: #666; font-size: 13px; }

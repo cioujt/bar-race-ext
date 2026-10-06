@@ -3,7 +3,7 @@
 // Reads a worksheet's summary data (period / id / name / value / optional rank) and animates it.
 
 const $ = (id) => document.getElementById(id);
-const DEFAULT_CFG = { sheet: '', period: '', id: '', name: '', value: '', rank: '', topn: 50, gran: 'all', axis: 'zoom' };
+const DEFAULT_CFG = { sheet: '', period: '', id: '', name: '', value: '', rank: '', topn: 30, gran: 'all', axis: 'zoom' };
 const GUESS = {
   period: /frame|hour|date|time|period/i,
   id: /(^|[^a-z])id($|[^a-z])|player.?id|item/i,
@@ -134,10 +134,8 @@ function makeRow(id, it) {
 function layout() {
   const stageH = $('stage').clientHeight;
   S.n = Math.max(1, ...S.frames.map((f) => f.rows.length));
-  S.rowH = Math.max(10, Math.min(30, Math.floor((stageH - 14) / S.n)));
-  const rows = $('rows');
-  rows.style.height = `${S.n * S.rowH}px`;
-  rows.style.fontSize = `${Math.max(9, Math.min(13, S.rowH - 5))}px`;
+  S.rowH = Math.max(10, Math.min(36, Math.floor((stageH - 14) / S.n)));
+  $('rows').style.height = `${S.n * S.rowH}px`; // font size follows --row-h in CSS
   document.documentElement.style.setProperty('--row-h', `${S.rowH}px`);
 
   const vals = S.frames.flatMap((f) => f.rows.map((r) => r.value));
@@ -171,7 +169,7 @@ function render(idx) {
     el.querySelector('.fill').style.width = `${pct}%`;
     const val = el.querySelector('.val');
     val.style.left = `${pct}%`;
-    val.textContent = r.value.toLocaleString(undefined, { maximumFractionDigits: 1 });
+    val.textContent = r.value.toLocaleString(undefined, { maximumFractionDigits: 1, useGrouping: false });
   }
   for (const [id, it] of S.items) {
     if (!seen.has(id) && it.el) {

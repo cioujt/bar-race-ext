@@ -34,5 +34,29 @@ Open ⚙ to map fields. Settings save in authoring mode; viewers get the saved m
 
 - **Frames:** all, or the last frame of each day (6-hour data → one frame per day)
 - **Axis:** zoom to data (starts at a round number below the lowest score) or from 0
-- **Top N**, **loop**, speed (1x = 1 s per frame)
+- **Top N** (default 50)
 - Rank column optional; without it, rank is computed from the value per frame.
+
+Toolbar (not saved): speed (1x = 1 s per frame) and **loop** — unchecked by default, so playback stops on the last frame; ⏮ / ▶ replays.
+
+## Customizing
+
+**Bar thickness is set by Top N, not by CSS.** `layout()` in `bar_race.js` fits every row into the stage:
+row height ≈ stage height ÷ row count, clamped to 10–36 px, and written inline as `--row-h` on `<html>` —
+so the `--row-h` in `bar_race.css` is only a pre-load fallback and editing it has no visible effect.
+At 50 rows in a 600 px tile a row is ~11 px; at 20 rows it is ~29 px. For thicker bars, lower Top N or make the tile taller.
+
+Where Top N comes from:
+- ⚙ → Top N → Apply. In authoring mode this saves into the workbook, and **a saved value overrides the code default**.
+- `DEFAULT_CFG.topn` in `bar_race.js` — default for a fresh extension and for `?mock=1`.
+- `value="50"` on `#s-topn` in `index.html` is overwritten on load; keep it in step for consistency only.
+
+Style knobs in `:root` of `bar_race.css`:
+
+| Variable | Effect |
+|----------|--------|
+| `--bar-gap` | Space between bars; bar height = row height − gap |
+| `--font-scale` | Row text size = row height × this |
+| `--font-min`, `--font-max` | Clamp for row text size |
+
+Values are shown without a thousands separator (`useGrouping: false` in `render()`).
